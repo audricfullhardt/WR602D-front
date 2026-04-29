@@ -9,9 +9,12 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/three": "^0.184.0",
+    "typescript": "^5.8.3",
     "vite": "^8.0.1"
   },
   "dependencies": {
-    "three": "^0.183.2"
+    "cannon-es": "^0.20.0",
+    "three": "^0.184.0"
   }
 }
