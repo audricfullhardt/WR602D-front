@@ -1,6 +1,8 @@
 import * as THREE from 'three'
 import { Ball } from './Ball'
 
+export type AimState = { direction: THREE.Vector3; power: number }
+
 export class InputController {
   private ball: Ball
   private camera: THREE.Camera
@@ -12,12 +14,20 @@ export class InputController {
   private aimLine: THREE.Line
   private scene: THREE.Scene
   private onShot: () => void
+  private onAim: ((state: AimState | null) => void) | undefined
 
-  constructor(ball: Ball, camera: THREE.Camera, scene: THREE.Scene, onShot: () => void) {
+  constructor(
+    ball: Ball,
+    camera: THREE.Camera,
+    scene: THREE.Scene,
+    onShot: () => void,
+    onAim?: (state: AimState | null) => void
+  ) {
     this.ball = ball
     this.camera = camera
     this.scene = scene
     this.onShot = onShot
+    this.onAim = onAim
 
     this.aimLine = this.createAimLine()
     this.scene.add(this.aimLine)
@@ -60,6 +70,8 @@ export class InputController {
     const direction = this.getDragDirection(drag)
     const power = Math.min(drag.length() / this.maxDragDistance, 1)
 
+    this.onAim?.({ direction: direction.clone(), power })
+
     const endPoint = ballPos.clone().add(direction.multiplyScalar(power * 3))
     this.updateAimLine(ballPos, endPoint)
   }
@@ -68,6 +80,7 @@ export class InputController {
     if (!this.isAiming) return
     this.isAiming = false
     this.hideAimLine()
+    this.onAim?.(null)
 
     const drag = new THREE.Vector2(
       e.clientX - this.startPoint.x,

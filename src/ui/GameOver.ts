@@ -1,0 +1,45 @@
+import { UIComponent } from "./UIComponent";
+import { HoleResult } from "../game/types";
+import { getScoreLabel } from "../game/Values";
+
+export class GameOver extends UIComponent {
+  private bodyEl: HTMLDivElement;
+
+  constructor(onRestart: () => void) {
+    super("div");
+    this.root.id = "ui-gameover";
+    this.root.innerHTML = `
+      <h2>Partie terminée !</h2>
+      <div class="ui-gameover-body"></div>
+      <button>Rejouer</button>
+    `;
+    this.bodyEl = this.root.querySelector(".ui-gameover-body")!;
+    this.root.querySelector("button")!.addEventListener("click", onRestart);
+  }
+
+  update(history: HoleResult[], totalStrokes: number, totalPar: number): void {
+    const rows = history.map(h => {
+      const diff = h.score >= 0 ? `+${h.score}` : String(h.score);
+      return `<tr>
+        <td>${h.levelId + 1}</td>
+        <td>${h.par}</td>
+        <td>${h.strokes}</td>
+        <td>${diff}</td>
+        <td>${getScoreLabel(h.strokes, h.par)}</td>
+      </tr>`;
+    }).join("");
+
+    const totalDiff = totalStrokes - totalPar;
+    const totalDiffStr = totalDiff >= 0 ? `+${totalDiff}` : String(totalDiff);
+
+    this.bodyEl.innerHTML = `
+      <table>
+        <thead>
+          <tr><th>Trou</th><th>Par</th><th>Coups</th><th>Score</th><th></th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <p class="ui-gameover-total">Total : ${totalStrokes} coups (${totalDiffStr} / par)</p>
+    `;
+  }
+}

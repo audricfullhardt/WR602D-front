@@ -8,7 +8,6 @@ interface SceneObjects {
 
 export function initScene(canvas: HTMLCanvasElement): SceneObjects {
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x87ceeb)
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
   renderer.setSize(window.innerWidth, window.innerHeight)
@@ -24,6 +23,11 @@ export function initScene(canvas: HTMLCanvasElement): SceneObjects {
   )
   camera.position.set(0, 8, 10)
   camera.lookAt(0, 0, 0)
+
+  const axesHelper = new THREE.AxesHelper(1)
+  axesHelper.setColors(0xff0000, 0x00ff00, 0x0000ff) // Rouge = X, Vert = Y, Bleu = Z
+  axesHelper.position.set(3, 0.01, 0)
+  scene.add(axesHelper)
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
   scene.add(ambientLight)

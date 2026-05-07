@@ -1,41 +1,65 @@
+import { GameState } from "../game/GameState";
+import { Score } from "./Score";
+import { Start } from "./Start";
+import { Reset } from "./Reset";
+import { GameOver } from "./GameOver";
+
+interface HUDCallbacks {
+  onStart: () => void;
+  onNextHole: () => void;
+  onRestart: () => void;
+}
+
 export class HUD {
-  private container: HTMLDivElement;
-  private strokesEl: HTMLSpanElement;
-  private messageEl: HTMLDivElement;
+  private score: Score;
+  private start: Start;
+  private reset: Reset;
+  private gameover: GameOver;
 
-  constructor() {
-    this.container = document.createElement("div");
-    this.container.id = "hud";
-
-    this.container.innerHTML = `
-        <div id="hud-strokes">
-          Coups : <span id="hud-strokes-count">0</span>
-        </div>
-        <div id="hud-message"></div>
-      `;
-
-    document.body.appendChild(this.container);
-
-    this.strokesEl = document.getElementById(
-      "hud-strokes-count"
-    ) as HTMLSpanElement;
-    this.messageEl = document.getElementById("hud-message") as HTMLDivElement;
+  constructor(callbacks: HUDCallbacks) {
+    this.score = new Score();
+    this.start = new Start(callbacks.onStart);
+    this.reset = new Reset(callbacks.onNextHole, callbacks.onRestart);
+    this.gameover = new GameOver(callbacks.onRestart);
   }
 
-  updateStrokes(count: number): void {
-    this.strokesEl.textContent = String(count);
-  }
+  update(gameState: GameState): void {
+    this.score.hide();
+    this.start.hide();
+    this.reset.hide();
+    this.gameover.hide();
 
-  showMessage(text: string): void {
-    this.messageEl.textContent = text;
-    this.messageEl.style.opacity = "1";
-  }
+    const phase = gameState.getPhase();
+    const level = gameState.getCurrentLevel();
 
-  showResetMessage(): void {
-    this.showMessage("Cliquez pour recommencer");
-  }
+    switch (phase) {
+      case "idle":
+        this.start.show();
+        break;
 
-  hideMessage(): void {
-    this.messageEl.style.opacity = "0";
+      case "playing":
+        this.score.update(gameState.getStrokes(), level.par);
+        this.score.show();
+        break;
+
+      case "completed": {
+        const history = gameState.getHistory();
+        const last = history[history.length - 1];
+        this.score.update(last.strokes, last.par);
+        this.score.show();
+        this.reset.update(last);
+        this.reset.show();
+        break;
+      }
+
+      case "game-over":
+        this.gameover.update(
+          gameState.getHistory(),
+          gameState.getTotalStrokes(),
+          gameState.getTotalPar()
+        );
+        this.gameover.show();
+        break;
+    }
   }
 }
