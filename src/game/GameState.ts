@@ -1,15 +1,22 @@
-import { GamePhase, HoleResult, LevelConfig } from "./types";
-import { LEVELS } from "./Levels";
+import { GamePhase, HoleResult } from "./types";
+import { LevelConfig } from "./levels/LevelConfig";
+import { LEVELS } from "./levels/levels";
+
+export const MAX_LIVES = 3;
+export const MAX_STROKES = 6;
 
 export class GameState {
   private phase: GamePhase = "idle";
   private currentStrokes = 0;
   private currentLevelIndex = 0;
   private history: HoleResult[] = [];
+  private lives = MAX_LIVES;
 
   getPhase(): GamePhase { return this.phase; }
   getStrokes(): number { return this.currentStrokes; }
   getHistory(): HoleResult[] { return [...this.history]; }
+  getLives(): number { return this.lives; }
+  isGameOver(): boolean { return this.lives <= 0; }
 
   getCurrentLevel(): LevelConfig {
     return LEVELS[this.currentLevelIndex];
@@ -43,6 +50,16 @@ export class GameState {
     this.phase = isLast ? "game-over" : "completed";
   }
 
+  loseLife(): void {
+    if (this.lives <= 0) return;
+    this.lives--;
+    if (this.lives <= 0) {
+      this.phase = "defeat";
+    } else {
+      this.currentStrokes = 0;
+    }
+  }
+
   nextHole(): void {
     this.currentLevelIndex++;
     this.currentStrokes = 0;
@@ -54,5 +71,6 @@ export class GameState {
     this.currentStrokes = 0;
     this.currentLevelIndex = 0;
     this.history = [];
+    this.lives = MAX_LIVES;
   }
 }

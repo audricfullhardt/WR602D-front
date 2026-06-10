@@ -4,7 +4,9 @@ import * as CANNON from "cannon-es";
 export class Ball {
   mesh: THREE.Mesh;
   body: CANNON.Body;
+  material: CANNON.Material;
 
+  private startPosition = new THREE.Vector3(0, 1, 4);
   private enteringHole = false;
   private enterHoleStart = new THREE.Vector3();
   private enterHoleTarget = new THREE.Vector3();
@@ -23,20 +25,24 @@ export class Ball {
 
     const shape = new CANNON.Sphere(radius);
 
-    const physicsMaterial = new CANNON.Material("ball");
-    physicsMaterial.friction = 0.4;
-    physicsMaterial.restitution = 0.3;
+    this.material = new CANNON.Material("ball");
+    this.material.friction = 0.4;
+    this.material.restitution = 0.3;
 
     this.body = new CANNON.Body({
       mass: 1,
       shape,
-      material: physicsMaterial,
+      material: this.material,
       linearDamping: 0.4,
       angularDamping: 0.4,
     });
 
-    this.body.position.set(0, 1, 4);
+    this.body.position.copy(this.startPosition as unknown as CANNON.Vec3);
     world.addBody(this.body);
+  }
+
+  setStart(position: THREE.Vector3): void {
+    this.startPosition.copy(position);
   }
 
   update(delta = 0): void {
@@ -91,7 +97,11 @@ export class Ball {
     this.mesh.visible = true;
     this.mesh.scale.setScalar(1);
     this.body.wakeUp();
-    this.body.position.set(0, 1, 4);
+    this.body.position.set(
+      this.startPosition.x,
+      this.startPosition.y,
+      this.startPosition.z
+    );
     this.body.velocity.set(0, 0, 0);
     this.body.angularVelocity.set(0, 0, 0);
   }

@@ -17,6 +17,18 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
+/* Lives — top right, hearts */
+#ui-lives {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  font-size: 1.5rem;
+  letter-spacing: 0.15rem;
+  color: #ff4d4d;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
 /* Fullscreen overlays */
 #ui-start,
 #ui-reset,

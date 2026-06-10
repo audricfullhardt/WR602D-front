@@ -3,21 +3,30 @@ import { HoleResult } from "../game/types";
 import { getScoreLabel } from "../game/Values";
 
 export class GameOver extends UIComponent {
+  private titleEl: HTMLHeadingElement;
   private bodyEl: HTMLDivElement;
 
   constructor(onRestart: () => void) {
     super("div");
     this.root.id = "ui-gameover";
     this.root.innerHTML = `
-      <h2>Partie terminée !</h2>
+      <h2></h2>
       <div class="ui-gameover-body"></div>
       <button>Rejouer</button>
     `;
+    this.titleEl = this.root.querySelector("h2")!;
     this.bodyEl = this.root.querySelector(".ui-gameover-body")!;
     this.root.querySelector("button")!.addEventListener("click", onRestart);
   }
 
+  updateDefeat(): void {
+    this.titleEl.textContent = "Plus de vies — Partie terminée";
+    this.bodyEl.innerHTML = "";
+  }
+
   update(history: HoleResult[], totalStrokes: number, totalPar: number): void {
+    this.titleEl.textContent = "Partie terminée !";
+
     const rows = history.map(h => {
       const diff = h.score >= 0 ? `+${h.score}` : String(h.score);
       return `<tr>

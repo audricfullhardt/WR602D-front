@@ -1,10 +1,4 @@
-export type GamePhase = "idle" | "playing" | "completed" | "game-over";
-
-export interface LevelConfig {
-  id: number;
-  par: number;
-  name: string;
-}
+export type GamePhase = "idle" | "playing" | "completed" | "game-over" | "defeat";
 
 export interface HoleResult {
   levelId: number;

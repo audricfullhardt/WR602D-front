@@ -25,7 +25,7 @@ export function initScene(canvas: HTMLCanvasElement): SceneObjects {
   camera.lookAt(0, 0, 0)
 
   const axesHelper = new THREE.AxesHelper(1)
-  axesHelper.setColors(0xff0000, 0x00ff00, 0x0000ff) // Rouge = X, Vert = Y, Bleu = Z
+  axesHelper.setColors(0xff0000, 0x00ff00, 0x0000ff)
   axesHelper.position.set(3, 0.01, 0)
   scene.add(axesHelper)
 

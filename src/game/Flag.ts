@@ -9,20 +9,32 @@ export class Flag {
   private readonly RAISE_DURATION = 0.3
   private readonly RAISE_AMOUNT = 0.5
   private baseY: number
+  private holePosition: THREE.Vector3
 
   constructor(scene: THREE.Scene, holePosition: THREE.Vector3) {
+    this.holePosition = holePosition.clone()
     this.baseY = holePosition.y + 1.5
 
     const loader = new GLTFLoader()
     loader.load(flagUrl, (gltf) => {
       this.model = gltf.scene
       this.model.scale.set(0.1, 0.1, 0.1)
-      this.model.position.set(holePosition.x, this.baseY, holePosition.z)
+      this.model.position.set(this.holePosition.x, this.baseY, this.holePosition.z)
       this.model.traverse((child) => {
         child.castShadow = true
       })
       scene.add(this.model)
     })
+  }
+
+  setHolePosition(holePosition: THREE.Vector3): void {
+    this.holePosition.copy(holePosition)
+    this.baseY = holePosition.y + 1.5
+    this.raising = false
+    this.raiseProgress = 0
+    if (this.model) {
+      this.model.position.set(holePosition.x, this.baseY, holePosition.z)
+    }
   }
 
   raise(): void {

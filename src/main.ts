@@ -4,43 +4,55 @@ import { initPhysics } from "./core/physics";
 import { Ball } from "./game/Ball";
 import { Track } from "./game/Track";
 import { InputController, AimState } from "./game/InputController";
-import { GameState } from "./game/GameState";
+import { GameState, MAX_STROKES } from "./game/GameState";
 import { Flag } from "./game/Flag";
 import { Club } from "./game/Club";
 import { HUD } from "./ui/HUD";
+import { AudioManager } from "./audio/AudioManager";
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const { scene, camera, renderer } = initScene(canvas);
 const { world, fixedTimeStep, maxSubSteps } = initPhysics();
 
 const ball = new Ball(scene, world);
-const track = new Track(scene, world);
+const track = new Track(scene, world, ball.material);
 const gameState = new GameState();
+const audio = new AudioManager();
 
-const holePosition = track.getHolePosition();
-const flag = new Flag(scene, holePosition);
 const club = new Club(scene);
+
+let holePosition = track.getHolePosition();
+const flag = new Flag(scene, holePosition);
+
+function loadLevel(): void {
+  const level = gameState.getCurrentLevel();
+  track.load(level);
+  holePosition = track.getHolePosition();
+  ball.setStart(track.getBallStart());
+  ball.reset();
+  flag.setHolePosition(holePosition);
+  club.setVisible(true);
+}
 
 const hud = new HUD({
   onStart: () => {
     gameState.startGame();
+    audio.playBgMusic();
     hud.update(gameState);
   },
   onNextHole: () => {
     gameState.nextHole();
-    ball.reset();
-    flag.reset();
-    club.setVisible(true);
+    loadLevel();
     hud.update(gameState);
   },
   onRestart: () => {
     gameState.reset();
-    ball.reset();
-    flag.reset();
-    club.setVisible(true);
+    loadLevel();
     hud.update(gameState);
   },
 });
+
+loadLevel();
 
 let aimState: AimState | null = null;
 
@@ -51,6 +63,19 @@ new InputController(
   () => {
     if (gameState.getPhase() !== "playing") return;
     gameState.addStroke();
+    audio.playHit();
+
+    if (gameState.getStrokes() >= MAX_STROKES) {
+      gameState.loseLife();
+      if (gameState.isGameOver()) {
+        club.setVisible(false);
+        audio.stopBgMusic();
+        audio.playGameOver();
+      } else {
+        ball.reset();
+      }
+    }
+
     hud.update(gameState);
   },
   (state) => {
@@ -68,6 +93,7 @@ function animate(time: number) {
   requestAnimationFrame(animate);
 
   const delta = lastTime !== undefined ? (time - lastTime) / 1000 : 0;
+  track.update(delta);
   world.step(fixedTimeStep, delta, maxSubSteps);
   lastTime = time;
 
@@ -83,6 +109,10 @@ function animate(time: number) {
     if (ball.isInHole(holePosition, holeRadius)) {
       gameState.completeHole();
       club.setVisible(false);
+      audio.playHoleIn();
+      if (gameState.getPhase() === "game-over") {
+        audio.stopBgMusic();
+      }
       ball.enterHole(holePosition, () => {
         flag.down();
         hud.update(gameState);
@@ -91,6 +121,8 @@ function animate(time: number) {
 
     if (ball.isCloseToHole(holePosition, holeRadius * 3)) {
       flag.raise();
+    } else {
+      flag.down();
     }
   }
 
