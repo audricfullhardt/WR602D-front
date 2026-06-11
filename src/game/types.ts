@@ -1,4 +1,10 @@
-export type GamePhase = "idle" | "playing" | "completed" | "game-over" | "defeat";
+export type GamePhase =
+  | "auth"
+  | "idle"
+  | "playing"
+  | "completed"
+  | "game-over"
+  | "defeat";
 
 export interface HoleResult {
   levelId: number;

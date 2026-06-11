@@ -9,6 +9,8 @@ import { Flag } from "./game/Flag";
 import { Club } from "./game/Club";
 import { HUD } from "./ui/HUD";
 import { AudioManager } from "./audio/AudioManager";
+import { isAuthenticated, logout } from "./api/auth";
+import { postScore } from "./api/scores";
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const { scene, camera, renderer } = initScene(canvas);
@@ -35,6 +37,14 @@ function loadLevel(): void {
 }
 
 const hud = new HUD({
+  onAuthenticated: () => {
+    gameState.goToStart();
+    hud.update(gameState);
+  },
+  onGuest: () => {
+    gameState.goToStart();
+    hud.update(gameState);
+  },
   onStart: () => {
     gameState.startGame();
     audio.playBgMusic();
@@ -50,9 +60,21 @@ const hud = new HUD({
     loadLevel();
     hud.update(gameState);
   },
+  onLogout: () => {
+    logout();
+    audio.stopBgMusic();
+    gameState.reset();
+    loadLevel();
+    gameState.requireAuth();
+    hud.update(gameState);
+  },
 });
 
 loadLevel();
+
+if (!isAuthenticated()) {
+  gameState.requireAuth();
+}
 
 let aimState: AimState | null = null;
 
@@ -107,11 +129,18 @@ function animate(time: number) {
 
   if (gameState.getPhase() === "playing") {
     if (ball.isInHole(holePosition, holeRadius)) {
+      const strokes = gameState.getStrokes();
+      const holeNumber = gameState.getCurrentLevel().id + 1;
       gameState.completeHole();
       club.setVisible(false);
       audio.playHoleIn();
       if (gameState.getPhase() === "game-over") {
         audio.stopBgMusic();
+      }
+      if (isAuthenticated()) {
+        postScore(strokes, holeNumber).catch((err) =>
+          console.warn("Échec de l'envoi du score:", err)
+        );
       }
       ball.enterHole(holePosition, () => {
         flag.down();

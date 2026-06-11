@@ -85,13 +85,12 @@ Les variables d'environnement sont gérées par Vite et doivent être préfixée
 
 ```bash
 # URL de l'API back-end
-VITE_API_URL=http://localhost:3000
+VITE_API_URL=https://localhost:8000
 ```
 
-| Variable       | Description                | Valeur par défaut       |
-| -------------- | -------------------------- | ----------------------- |
-| `VITE_API_URL` | URL de base de l'API back  | `http://localhost:3000` |
+| Variable       | Description                | Valeur par défaut        |
+| -------------- | -------------------------- | ------------------------ |
+| `VITE_API_URL` | URL de base de l'API back  | `https://localhost:8000` |
 
-> Cette variable est réservée à l'intégration du back-end (sauvegarde des
-> scores, authentification). Elle n'est pas encore consommée par le code du
-> front à ce stade du projet.
+> Cette variable est consommée par la couche API (`src/api/`) pour
+> l'authentification et l'envoi des scores.

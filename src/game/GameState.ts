@@ -30,6 +30,14 @@ export class GameState {
     return this.history.reduce((sum, h) => sum + h.par, 0);
   }
 
+  requireAuth(): void {
+    this.phase = "auth";
+  }
+
+  goToStart(): void {
+    this.phase = "idle";
+  }
+
   startGame(): void {
     this.phase = "playing";
   }

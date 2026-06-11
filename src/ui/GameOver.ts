@@ -12,11 +12,16 @@ export class GameOver extends UIComponent {
     this.root.innerHTML = `
       <h2></h2>
       <div class="ui-gameover-body"></div>
+      <div class="ui-leaderboard-slot"></div>
       <button>Rejouer</button>
     `;
     this.titleEl = this.root.querySelector("h2")!;
     this.bodyEl = this.root.querySelector(".ui-gameover-body")!;
     this.root.querySelector("button")!.addEventListener("click", onRestart);
+  }
+
+  getLeaderboardSlot(): HTMLElement {
+    return this.root.querySelector(".ui-leaderboard-slot")!;
   }
 
   updateDefeat(): void {
