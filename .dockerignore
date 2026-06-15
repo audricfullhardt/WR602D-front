@@ -1,0 +1,11 @@
+node_modules
+dist
+.env.local
+.env.*.local
+test-results
+playwright-report
+.git
+.gitignore
+Dockerfile
+.dockerignore
+*.md
