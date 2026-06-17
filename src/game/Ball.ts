@@ -13,6 +13,9 @@ export class Ball {
   private enterHoleProgress = 0;
   private onHoleEntered: (() => void) | null = null;
   private readonly ENTER_HOLE_DURATION = 0.55;
+  // Vitesse horizontale max : empêche la balle (accélérée par les bumpers à
+  // restitution > 1) de dépasser une vitesse qui la ferait traverser les murs fins.
+  private readonly MAX_SPEED = 16;
 
   constructor(scene: THREE.Scene, world: CANNON.World) {
     const radius = 0.2;
@@ -69,10 +72,22 @@ export class Ball {
       return;
     }
 
+    this.clampSpeed();
+
     this.mesh.position.copy(this.body.position as unknown as THREE.Vector3);
     this.mesh.quaternion.copy(
       this.body.quaternion as unknown as THREE.Quaternion
     );
+  }
+
+  private clampSpeed(): void {
+    const v = this.body.velocity;
+    const horizontalSpeed = Math.hypot(v.x, v.z);
+    if (horizontalSpeed > this.MAX_SPEED) {
+      const scale = this.MAX_SPEED / horizontalSpeed;
+      v.x *= scale;
+      v.z *= scale;
+    }
   }
 
   enterHole(holePosition: THREE.Vector3, onComplete: () => void): void {

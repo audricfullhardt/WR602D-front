@@ -1,8 +1,6 @@
 import * as THREE from 'three'
 import { Ball } from './Ball'
 
-export type AimState = { direction: THREE.Vector3; power: number }
-
 export class InputController {
   private ball: Ball
   private camera: THREE.Camera
@@ -11,17 +9,18 @@ export class InputController {
   private maxForce: number = 15
   private maxDragDistance: number = 200
 
-  private aimLine: THREE.Line
+  private aimDots: THREE.Group
+  private readonly DOT_COUNT = 8
   private scene: THREE.Scene
   private onShot: () => void
-  private onAim: ((state: AimState | null) => void) | undefined
+  private onAim: ((angle: number, power: number) => void) | undefined
 
   constructor(
     ball: Ball,
     camera: THREE.Camera,
     scene: THREE.Scene,
     onShot: () => void,
-    onAim?: (state: AimState | null) => void
+    onAim?: (angle: number, power: number) => void
   ) {
     this.ball = ball
     this.camera = camera
@@ -29,20 +28,30 @@ export class InputController {
     this.onShot = onShot
     this.onAim = onAim
 
-    this.aimLine = this.createAimLine()
-    this.scene.add(this.aimLine)
+    this.aimDots = this.createAimDots()
+    this.scene.add(this.aimDots)
 
     this.bindEvents()
   }
 
-  private createAimLine(): THREE.Line {
-    const points = [new THREE.Vector3(), new THREE.Vector3()]
-    const geometry = new THREE.BufferGeometry().setFromPoints(points)
-    const material = new THREE.LineBasicMaterial({
-      color: 0xff0000,
-      depthTest: false,
-    })
-    return new THREE.Line(geometry, material)
+  private createAimDots(): THREE.Group {
+    const group = new THREE.Group()
+    const geometry = new THREE.SphereGeometry(0.04, 8, 8)
+
+    for (let i = 0; i < this.DOT_COUNT; i++) {
+      const material = new THREE.MeshBasicMaterial({
+        color: 0x00ffff,
+        depthTest: false,
+        transparent: true,
+        opacity: 0.9,
+      })
+      const dot = new THREE.Mesh(geometry, material)
+      dot.renderOrder = 999
+      group.add(dot)
+    }
+
+    group.visible = false
+    return group
   }
 
   private bindEvents(): void {
@@ -70,17 +79,17 @@ export class InputController {
     const direction = this.getDragDirection(drag)
     const power = Math.min(drag.length() / this.maxDragDistance, 1)
 
-    this.onAim?.({ direction: direction.clone(), power })
+    // Angle du tir dans le plan XZ -> rotation Y du club.
+    const angle = Math.atan2(direction.x, direction.z)
+    this.onAim?.(angle, power)
 
-    const endPoint = ballPos.clone().add(direction.multiplyScalar(power * 3))
-    this.updateAimLine(ballPos, endPoint)
+    this.updateAimDots(ballPos, direction, power)
   }
 
   private onMouseUp(e: MouseEvent): void {
     if (!this.isAiming) return
     this.isAiming = false
-    this.hideAimLine()
-    this.onAim?.(null)
+    this.hideAimDots()
 
     const drag = new THREE.Vector2(
       e.clientX - this.startPoint.x,
@@ -108,22 +117,36 @@ export class InputController {
     return direction
   }
 
-  private updateAimLine(from: THREE.Vector3, to: THREE.Vector3): void {
-    const positions = this.aimLine.geometry.attributes.position
-    positions.setXYZ(0, from.x, from.y + 0.1, from.z)
-    positions.setXYZ(1, to.x, to.y + 0.1, to.z)
-    positions.needsUpdate = true
-    this.aimLine.visible = true
+  private updateAimDots(
+    from: THREE.Vector3,
+    direction: THREE.Vector3,
+    power: number
+  ): void {
+    // Longueur de la trajectoire affichée, proportionnelle à la puissance.
+    const length = 1 + power * 3
+    const step = length / this.DOT_COUNT
+
+    for (let i = 0; i < this.DOT_COUNT; i++) {
+      const dot = this.aimDots.children[i]
+      const distance = step * (i + 1)
+      dot.position.set(
+        from.x + direction.x * distance,
+        from.y + 0.1,
+        from.z + direction.z * distance
+      )
+    }
+
+    this.aimDots.visible = true
   }
 
-  private hideAimLine(): void {
-    this.aimLine.visible = false
+  private hideAimDots(): void {
+    this.aimDots.visible = false
   }
 
   dispose(): void {
     window.removeEventListener('mousedown', this.onMouseDown.bind(this))
     window.removeEventListener('mousemove', this.onMouseMove.bind(this))
     window.removeEventListener('mouseup', this.onMouseUp.bind(this))
-    this.scene.remove(this.aimLine)
+    this.scene.remove(this.aimDots)
   }
 }

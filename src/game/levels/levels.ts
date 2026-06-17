@@ -1,5 +1,9 @@
 import { LevelConfig } from "./LevelConfig";
 
+// Convention : murs d'épaisseur 0.2, hauteur 0.5, y = 0.4.
+// Les jonctions entre murs adjacents se chevauchent volontairement (~0.2) pour
+// garantir des terrains hermétiques, sans aucun trou aux angles ni aux virages.
+
 export const LEVELS: LevelConfig[] = [
   {
     id: 0,
@@ -7,8 +11,8 @@ export const LEVELS: LevelConfig[] = [
     par: 2,
     floorSize: { width: 4, depth: 12 },
     walls: [
-      { position: [-2.1, 0.4, 0], size: [0.2, 0.5, 12] },
-      { position: [2.1, 0.4, 0], size: [0.2, 0.5, 12] },
+      { position: [-2.1, 0.4, 0], size: [0.2, 0.5, 12.4] },
+      { position: [2.1, 0.4, 0], size: [0.2, 0.5, 12.4] },
       { position: [0, 0.4, 6.1], size: [4.4, 0.5, 0.2] },
       { position: [0, 0.4, -6.1], size: [4.4, 0.5, 0.2] },
     ],
@@ -17,19 +21,26 @@ export const LEVELS: LevelConfig[] = [
   },
   {
     id: 1,
-    name: "Virage",
+    name: "Virage en L",
     par: 3,
     floorSize: { width: 8, depth: 8 },
+    // L : couloir vertical (gauche) -> virage 90° -> couloir horizontal (bas).
     walls: [
-      { position: [-4.1, 0.4, 0], size: [0.2, 0.5, 8] },
-      { position: [-2, 0.4, 4.1], size: [4.2, 0.5, 0.2] },
-      { position: [0, 0.4, -4.1], size: [8.2, 0.5, 0.2] },
-      { position: [4.1, 0.4, -2], size: [0.2, 0.5, 4.2] },
-      { position: [0.1, 0.4, 2], size: [0.2, 0.5, 4] },
-      { position: [2, 0.4, 0.1], size: [4, 0.5, 0.2] },
+      // Bord extérieur gauche (toute la hauteur).
+      { position: [-4.1, 0.4, 0], size: [0.2, 0.5, 8.4] },
+      // Bord extérieur bas (toute la largeur).
+      { position: [0, 0.4, -4.1], size: [8.4, 0.5, 0.2] },
+      // Haut du couloir vertical (chevauche le bord gauche et le mur intérieur).
+      { position: [-2.85, 0.4, 4.1], size: [2.9, 0.5, 0.2] },
+      // Extrémité droite du couloir horizontal.
+      { position: [4.1, 0.4, -2.85], size: [0.2, 0.5, 2.9] },
+      // Coin intérieur, face verticale (sépare le couloir vertical du bloc).
+      { position: [-1.4, 0.4, 1.35], size: [0.2, 0.5, 5.9] },
+      // Coin intérieur, face horizontale (sépare le couloir horizontal du bloc).
+      { position: [1.35, 0.4, -1.4], size: [5.9, 0.5, 0.2] },
     ],
-    ballStart: [-2, 1, 3],
-    holePosition: [3, 0.11, -2],
+    ballStart: [-2.75, 1, 3],
+    holePosition: [3, 0.11, -2.75],
   },
   {
     id: 2,
@@ -37,12 +48,14 @@ export const LEVELS: LevelConfig[] = [
     par: 3,
     floorSize: { width: 6, depth: 14 },
     walls: [
-      { position: [-3.1, 0.4, 0], size: [0.2, 0.5, 14] },
-      { position: [3.1, 0.4, 0], size: [0.2, 0.5, 14] },
+      { position: [-3.1, 0.4, 0], size: [0.2, 0.5, 14.4] },
+      { position: [3.1, 0.4, 0], size: [0.2, 0.5, 14.4] },
       { position: [0, 0.4, 7.1], size: [6.4, 0.5, 0.2] },
       { position: [0, 0.4, -7.1], size: [6.4, 0.5, 0.2] },
-      { position: [-1, 0.4, 3], size: [4, 0.5, 0.2] },
-      { position: [1, 0.4, -3], size: [4, 0.5, 0.2] },
+      // Chicane haute : part du mur gauche, laisse un passage à droite.
+      { position: [-1.1, 0.4, 3], size: [4.2, 0.5, 0.2] },
+      // Chicane basse : part du mur droit, laisse un passage à gauche.
+      { position: [1.1, 0.4, -3], size: [4.2, 0.5, 0.2] },
     ],
     ballStart: [0, 1, 6],
     holePosition: [0, 0.11, -6],
@@ -54,8 +67,8 @@ export const LEVELS: LevelConfig[] = [
     par: 4,
     floorSize: { width: 10, depth: 14 },
     walls: [
-      { position: [-5.1, 0.4, 0], size: [0.2, 0.5, 14] },
-      { position: [5.1, 0.4, 0], size: [0.2, 0.5, 14] },
+      { position: [-5.1, 0.4, 0], size: [0.2, 0.5, 14.4] },
+      { position: [5.1, 0.4, 0], size: [0.2, 0.5, 14.4] },
       { position: [0, 0.4, 7.1], size: [10.4, 0.5, 0.2] },
       { position: [0, 0.4, -7.1], size: [10.4, 0.5, 0.2] },
     ],
@@ -71,22 +84,27 @@ export const LEVELS: LevelConfig[] = [
     name: "Virage étroit",
     par: 4,
     floorSize: { width: 6, depth: 8 },
+    // L étroit : couloir vertical (largeur 2) -> virage -> couloir horizontal.
     walls: [
-      { position: [-3.1, 0.4, 0], size: [0.2, 0.5, 8] },
-      { position: [-1.5, 0.4, 4.1], size: [3.2, 0.5, 0.2] },
-      { position: [0, 0.4, -4.1], size: [6.2, 0.5, 0.2] },
-      { position: [3.1, 0.4, -1.5], size: [0.2, 0.5, 3.2] },
-      { position: [0.1, 0.4, 2], size: [0.2, 0.5, 4] },
-      { position: [1.5, 0.4, 0.1], size: [3, 0.5, 0.2] },
+      { position: [-3.1, 0.4, 0], size: [0.2, 0.5, 8.4] },
+      { position: [0, 0.4, -4.1], size: [6.4, 0.5, 0.2] },
+      // Haut du couloir vertical.
+      { position: [-2.0, 0.4, 4.1], size: [2.4, 0.5, 0.2] },
+      // Extrémité droite du couloir horizontal.
+      { position: [3.1, 0.4, -3.0], size: [0.2, 0.5, 2.4] },
+      // Coin intérieur, face verticale (inner face à x = -1.0).
+      { position: [-0.9, 0.4, 1.1], size: [0.2, 0.5, 6.2] },
+      // Coin intérieur, face horizontale (inner face à z = -2.0).
+      { position: [1.1, 0.4, -1.9], size: [4.2, 0.5, 0.2] },
     ],
-    ballStart: [-1.5, 1, 3],
-    holePosition: [2.3, 0.11, -1.5],
+    ballStart: [-2.0, 1, 3],
+    holePosition: [2.3, 0.11, -3.0],
     obstacles: [
       {
         type: "bumper",
-        position: [1, 0.4, -1.5],
+        position: [1, 0.4, -3],
         radius: 0.4,
-        movement: { axis: "z", range: 1, speed: 2 },
+        movement: { axis: "z", range: 0.4, speed: 2 },
       },
     ],
   },

@@ -15,8 +15,11 @@ export function initPhysics(): PhysicsWorld {
 
   world.allowSleep = true
 
-  const fixedTimeStep = 1 / 60
-  const maxSubSteps = 3
+  // Pas de simulation plus fin + davantage de sous-étapes : à grande vitesse
+  // (balle accélérée par les bumpers), un pas de 1/60 laisse la balle parcourir
+  // plus que l'épaisseur d'un mur (0.2 m) sans détection de collision (tunneling).
+  const fixedTimeStep = 1 / 120
+  const maxSubSteps = 10
 
   return { world, fixedTimeStep, maxSubSteps }
 }

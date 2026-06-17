@@ -3,7 +3,7 @@ import { initScene } from "./core/scene";
 import { initPhysics } from "./core/physics";
 import { Ball } from "./game/Ball";
 import { Track } from "./game/Track";
-import { InputController, AimState } from "./game/InputController";
+import { InputController } from "./game/InputController";
 import { GameState, MAX_STROKES } from "./game/GameState";
 import { Flag } from "./game/Flag";
 import { Club } from "./game/Club";
@@ -76,13 +76,14 @@ if (!isAuthenticated()) {
   gameState.requireAuth();
 }
 
-let aimState: AimState | null = null;
-
 new InputController(
   ball,
   camera,
   scene,
   () => {
+    // Relâchement : déclenche le swing du club.
+    club.release();
+
     if (gameState.getPhase() !== "playing") return;
     gameState.addStroke();
     audio.playHit();
@@ -100,8 +101,9 @@ new InputController(
 
     hud.update(gameState);
   },
-  (state) => {
-    aimState = state;
+  (angle, power) => {
+    // Visée en temps réel : le club tourne et arme le backswing.
+    club.aim(angle, power);
   }
 );
 
@@ -121,11 +123,7 @@ function animate(time: number) {
 
   ball.update(delta);
   flag.update(delta);
-  club.update(
-    ball.mesh.position,
-    aimState?.direction ?? null,
-    aimState?.power ?? 0
-  );
+  club.update(ball.mesh.position, ball.isMoving(), delta);
 
   if (gameState.getPhase() === "playing") {
     if (ball.isInHole(holePosition, holeRadius)) {

@@ -109,7 +109,7 @@ export class Track {
   private createWalls(
     walls: { position: [number, number, number]; size: [number, number, number] }[]
   ): void {
-    walls.forEach(({ position, size }) => {
+    walls.forEach(({ position, size }, i) => {
       const geometry = new THREE.BoxGeometry(size[0], size[1], size[2])
       const material = new THREE.MeshStandardMaterial({ color: 0x8b4513 })
       const mesh = new THREE.Mesh(geometry, material)
@@ -119,15 +119,23 @@ export class Track {
       this.scene.add(mesh)
       this.meshes.push(mesh)
 
+      const halfExtents = new CANNON.Vec3(size[0] / 2, size[1] / 2, size[2] / 2)
       const body = new CANNON.Body({
         mass: 0,
-        shape: new CANNON.Box(
-          new CANNON.Vec3(size[0] / 2, size[1] / 2, size[2] / 2)
-        ),
+        shape: new CANNON.Box(halfExtents),
       })
       body.position.set(position[0], position[1], position[2])
       this.world.addBody(body)
       this.bodies.push(body)
+
+      // [TEMP DEBUG] vérification alignement mesh <-> corps physique
+      console.log(`[wall ${i}]`, {
+        meshPos: [mesh.position.x, mesh.position.y, mesh.position.z],
+        bodyPos: [body.position.x, body.position.y, body.position.z],
+        meshSize: [size[0], size[1], size[2]],
+        bodyHalfExtents: [halfExtents.x, halfExtents.y, halfExtents.z],
+        mass: body.mass,
+      })
     })
   }
 
