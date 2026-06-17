@@ -11,7 +11,9 @@ export function initPhysics(): PhysicsWorld {
 
   world.gravity.set(0, -9.82, 0)
 
-  world.broadphase = new CANNON.SAPBroadphase(world)
+  // NaiveBroadphase (O(n²) mais quelques corps seulement par niveau) : fiable.
+  // SAPBroadphase rate des paires de collision -> objets qui se traversent.
+  world.broadphase = new CANNON.NaiveBroadphase()
 
   world.allowSleep = true
 

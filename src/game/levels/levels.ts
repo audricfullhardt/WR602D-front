@@ -48,14 +48,17 @@ export const LEVELS: LevelConfig[] = [
     par: 3,
     floorSize: { width: 6, depth: 14 },
     walls: [
-      { position: [-3.1, 0.4, 0], size: [0.2, 0.5, 14.4] },
-      { position: [3.1, 0.4, 0], size: [0.2, 0.5, 14.4] },
+      // Murs latéraux épaissis (0.4), face intérieure conservée à x = ±3.0.
+      { position: [-3.2, 0.4, 0], size: [0.4, 0.5, 14.4] },
+      { position: [3.2, 0.4, 0], size: [0.4, 0.5, 14.4] },
       { position: [0, 0.4, 7.1], size: [6.4, 0.5, 0.2] },
       { position: [0, 0.4, -7.1], size: [6.4, 0.5, 0.2] },
-      // Chicane haute : part du mur gauche, laisse un passage à droite.
-      { position: [-1.1, 0.4, 3], size: [4.2, 0.5, 0.2] },
-      // Chicane basse : part du mur droit, laisse un passage à gauche.
-      { position: [1.1, 0.4, -3], size: [4.2, 0.5, 0.2] },
+      // Chicane haute : épaisseur 0.4, pénètre de 0.3 dans le mur gauche
+      // (extrémité à x = -3.3), laisse un passage à droite (x ∈ [1.0, 3.0]).
+      { position: [-1.15, 0.4, 3], size: [4.3, 0.5, 0.4] },
+      // Chicane basse : épaisseur 0.4, pénètre de 0.3 dans le mur droit
+      // (extrémité à x = 3.3), laisse un passage à gauche (x ∈ [-3.0, -1.0]).
+      { position: [1.15, 0.4, -3], size: [4.3, 0.5, 0.4] },
     ],
     ballStart: [0, 1, 6],
     holePosition: [0, 0.11, -6],

@@ -36,7 +36,9 @@ export class Track {
     this.world.addContactMaterial(
       new CANNON.ContactMaterial(ballMaterial, this.bumperMaterial, {
         friction: 0.1,
-        restitution: 1.4,
+        // Rebond élastique sans gain d'énergie : > 1.0 injecte de la vitesse à
+        // chaque rebond et provoque le tunneling (normal-flip) à travers les murs.
+        restitution: 1.0,
       })
     )
   }

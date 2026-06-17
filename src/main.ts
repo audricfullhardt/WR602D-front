@@ -28,7 +28,13 @@ const flag = new Flag(scene, holePosition);
 
 function loadLevel(): void {
   const level = gameState.getCurrentLevel();
+  // [TEMP DEBUG] comptage des corps physiques autour du changement de niveau.
+  const before = world.bodies.length;
   track.load(level);
+  const after = world.bodies.length;
+  console.log(
+    `[loadLevel] niveau id=${level.id} | bodies avant=${before} après=${after} | murs=${level.walls.length} obstacles=${level.obstacles?.length ?? 0} (+1 sol +1 balle)`
+  );
   holePosition = track.getHolePosition();
   ball.setStart(track.getBallStart());
   ball.reset();

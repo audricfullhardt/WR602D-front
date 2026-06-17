@@ -40,6 +40,14 @@ export class Ball {
       angularDamping: 0.4,
     });
 
+    // [TEMP DEBUG] confirme qu'une collision est bien détectée et avec quel corps.
+    this.body.addEventListener("collide", (e: { body: CANNON.Body }) => {
+      const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
+      console.log(
+        `[ball collide] avec mass=${e.body.mass} | vitesse balle=${speed.toFixed(1)} m/s`
+      );
+    });
+
     this.body.position.copy(this.startPosition as unknown as CANNON.Vec3);
     world.addBody(this.body);
   }
@@ -104,6 +112,9 @@ export class Ball {
   hit(force: THREE.Vector3): void {
     this.body.wakeUp();
     this.body.applyImpulse(new CANNON.Vec3(force.x, force.y, force.z));
+    // Borne la vitesse dès le tir (avant le 1er world.step), pas seulement à la
+    // frame suivante : évite tout pic intra-step qui ferait tunneliser un mur.
+    this.clampSpeed();
   }
 
   reset(): void {
